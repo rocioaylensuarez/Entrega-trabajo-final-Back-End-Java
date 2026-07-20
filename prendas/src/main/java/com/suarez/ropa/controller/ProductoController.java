@@ -9,7 +9,7 @@ import com.suarez.ropa.service.ProductoService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/productos")
+@RequestMapping("/api/productos")
 public class ProductoController {
 
     private final ProductoService service;

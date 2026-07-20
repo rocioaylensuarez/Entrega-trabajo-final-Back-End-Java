@@ -9,7 +9,7 @@ import com.suarez.ropa.service.CategoriaService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/categorias")
+@RequestMapping("/api/categorias")
 public class CategoriaController {
 
     private final CategoriaService service;
