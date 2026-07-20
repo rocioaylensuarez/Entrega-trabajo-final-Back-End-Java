@@ -1,5 +1,9 @@
 package com.suarez.ropa.repository;
 
-public class CategoriaRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.suarez.ropa.model.Categoria;
+
+public interface CategoriaRepository extends JpaRepository<Categoria, Integer> {
     
-}
+} 
