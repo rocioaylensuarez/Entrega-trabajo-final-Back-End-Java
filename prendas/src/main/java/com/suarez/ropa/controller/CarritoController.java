@@ -4,12 +4,12 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.suarez.ropa.model.Producto;
+import com.suarez.ropa.model.Carrito;
 import com.suarez.ropa.service.CarritoService;
 
 
 @RestController
-@RequestMapping("/carritos")
+@RequestMapping("/api/carritos")
 public class CarritoController {
 
     private final CarritoService service;
