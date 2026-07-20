@@ -19,7 +19,6 @@ public class CarritoProducto {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    // --- AQUÍ VA EL CÓDIGO CORREGIDO ---
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @ManyToOne

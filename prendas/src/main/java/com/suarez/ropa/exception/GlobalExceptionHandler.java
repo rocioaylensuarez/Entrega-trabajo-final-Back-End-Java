@@ -13,13 +13,6 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Cuando @Valid falla, Spring lanza MethodArgumentNotValidException.
-    // Usamos Map porque pueden fallar varios campos a la vez:
-    // { "nombre": "El nombre no puede estar vacío", "precio": "Debe ser mayor que cero" }
-    //
-    // Versión simplificada (solo devuelve el primer error):
-    // String mensaje = ex.getBindingResult().getFieldErrors().get(0).getDefaultMessage();
-    // return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(mensaje);
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> manejarValidacion(
             MethodArgumentNotValidException ex) {
