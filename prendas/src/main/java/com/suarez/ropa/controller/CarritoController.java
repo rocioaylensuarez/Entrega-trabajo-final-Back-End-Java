@@ -28,14 +28,11 @@ public class CarritoController {
         return ResponseEntity.ok(service.obtenerPorId(id));
     }
 
-    // Crea un carrito vacío — debe existir antes de agregar productos
     @PostMapping
     public ResponseEntity<Carrito> crear() {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.crear());
     }
 
-    // Dos @PathVariable porque necesita identificar el carrito y el producto.
-    // No usa @RequestBody — toda la información está en la URL.
     @PostMapping("/{carritoId}/productos/{productoId}")
     public ResponseEntity<Carrito> agregarProducto(
             @PathVariable Integer carritoId,
@@ -43,7 +40,6 @@ public class CarritoController {
         return ResponseEntity.ok(service.agregarProducto(carritoId, productoId));
     }
 
-    // Vacía el carrito sin eliminarlo — el usuario puede seguir usándolo
     @DeleteMapping("/{id}/vaciar")
     public ResponseEntity<Carrito> vaciar(@PathVariable Integer id) {
         return ResponseEntity.ok(service.vaciar(id));
@@ -54,4 +50,11 @@ public class CarritoController {
         service.eliminar(id);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/{id}/comprar")
+    public ResponseEntity<Carrito> comprar(@PathVariable Integer id) {
+        Carrito carritoComprado = service.comprar(id);
+        return ResponseEntity.ok(carritoComprado);
+    }
+
 }

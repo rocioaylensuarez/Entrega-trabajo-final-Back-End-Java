@@ -80,4 +80,12 @@ public class CarritoService {
         Carrito carrito = obtenerPorId(id);
         carritoRepository.delete(carrito);
     }
+
+    public Carrito comprar(Integer id) {
+    Carrito carrito = obtenerPorId(id);
+    if (carrito.getProductos() == null || carrito.getProductos().isEmpty()) {
+        throw new RuntimeException("El carrito está vacío, no se puede realizar la compra.");
+    }
+    return vaciar(id);
+}
 }

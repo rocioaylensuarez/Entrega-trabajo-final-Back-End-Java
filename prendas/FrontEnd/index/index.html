@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tienda de Ropa - E-commerce</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 font-sans">
+
+    <header class="bg-blue-600 text-white shadow-md">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold">Stilo Store 🛍️</h1>
+            <div class="flex items-center space-x-4">
+                <button onclick="crearCarrito()"
+                    class="bg-green-500 hover:bg-green-600 px-4 py-2 rounded text-sm font-semibold transition">
+                    🛒 Nuevo Carrito
+                </button>
+                <span id="carrito-info" class="bg-blue-700 px-3 py-1 rounded text-sm">Carrito ID: Ninguno</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+
+        <section class="md:col-span-2">
+            <h2 class="text-xl font-bold mb-4 text-gray-800">Catálogo de Prendas</h2>
+            <div id="productos-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            </div>
+        </section>
+
+        <aside class="bg-white p-6 rounded-lg shadow-md h-fit">
+            <h2 class="text-xl font-bold mb-4 text-gray-800 border-b pb-2">Tu Carrito de Compras</h2>
+            <div id="carrito-contenido" class="space-y-4 mb-6">
+                <p class="text-gray-500 text-sm">Selecciona un carrito y añade productos.</p>
+            </div>
+            <div class="border-t pt-4 flex justify-between font-bold text-lg">
+                <span>Total elementos:</span>
+                <span id="carrito-total">0</span>
+            </div>
+
+        <button onclick="comprarCarrito()"
+            class="w-full mt-2 bg-green-500 hover:bg-green-600 text-white py-2 rounded font-semibold transition">
+            Finalizar Compra
+        </button>
+        <button onclick="vaciarCarrito()"
+            class="w-full mt-2 bg-red-500 hover:bg-red-600 text-white py-2 rounded font-semibold transition">
+            Vaciar Carrito
+        </button>
+        
+        </aside>
+
+    </main>
+
+    <script>
+        const API_URL = 'http://localhost:8080';
+        let carritoIdActual = null;
+
+        // 1. Cargar productos al iniciar la página
+        async function cargarProductos() {
+            try {
+                const response = await fetch(`${API_URL}/api/productos`);
+                const productos = await response.json();
+
+                const contenedor = document.getElementById('productos-grid');
+                contenedor.innerHTML = '';
+
+                productos.forEach(prod => {
+                    contenedor.innerHTML += `
+                        <div class="bg-white p-4 rounded-lg shadow flex flex-col justify-between">
+                            <div>
+                                <h3 class="font-bold text-lg text-gray-800">${prod.nombre}</h3>
+                                <p class="text-gray-600 text-sm mb-2">$${prod.precio} - Stock: ${prod.stock}</p>
+                            </div>
+                            <button onclick="agregarAlCarrito(${prod.id})" 
+                                class="mt-4 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded text-sm font-semibold transition">
+                                Agregar al Carrito
+                            </button>
+                        </div>
+                    `;
+                });
+            } catch (error) {
+                console.error("Error cargando productos:", error);
+                alert("No se pudo conectar con el servidor backend Java.");
+            }
+        }
+
+        // 2. Crear un nuevo carrito en la base de datos
+        async function crearCarrito() {
+            try {
+                const response = await fetch(`${API_URL}/api/carritos`, { method: 'POST' });
+                const carrito = await response.json();
+                carritoIdActual = carrito.id;
+                document.getElementById('carrito-info').innerText = `Carrito ID: ${carritoIdActual}`;
+                document.getElementById('carrito-contenido').innerHTML = `<p class="text-green-600 text-sm">Carrito #${carritoIdActual} listo para usar.</p>`;
+                document.getElementById('carrito-total').innerText = '0';
+            } catch (error) {
+                console.error("Error creando carrito:", error);
+            }
+        }
+
+        // 3. Agregar producto al carrito actual
+        async function agregarAlCarrito(productoId) {
+            if (!carritoIdActual) {
+                alert("¡Primero debes hacer clic en 'Nuevo Carrito'!");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/carritos/${carritoIdActual}/productos/${productoId}`, {
+                    method: 'POST'
+                });
+
+                if (!response.ok) {
+                    const errorMsg = await response.text();
+                    alert("Error: " + errorMsg);
+                    return;
+                }
+
+                const carritoActualizado = await response.json();
+                actualizarVistaCarrito(carritoActualizado);
+                cargarProductos(); // Refrescar stock visualmente
+            } catch (error) {
+                console.error("Error agregando producto:", error);
+            }
+        }
+
+        // 4. Actualizar el panel visual del carrito
+        function actualizarVistaCarrito(carrito) {
+            const contenedor = document.getElementById('carrito-contenido');
+            contenedor.innerHTML = '';
+
+            let totalItems = 0;
+
+            if (carrito.productos && carrito.productos.length > 0) {
+                carrito.productos.forEach(item => {
+                    totalItems += item.cantidad;
+                    contenedor.innerHTML += `
+                        <div class="flex justify-between items-center text-sm border-b pb-2">
+                            <span>${item.producto.nombre} (x${item.cantidad})</span>
+                            <span class="font-semibold">$${item.producto.precio * item.cantidad}</span>
+                        </div>
+                    `;
+                });
+            } else {
+                contenedor.innerHTML = `<p class="text-gray-500 text-sm">El carrito está vacío.</p>`;
+            }
+
+            document.getElementById('carrito-total').innerText = totalItems;
+        }
+
+        // 5. Vaciar carrito
+        async function vaciarCarrito() {
+            if (!carritoIdActual) return;
+
+            try {
+                const response = await fetch(`${API_URL}/api/carritos/${carritoIdActual}/vaciar`, {
+                    method: 'DELETE'
+                });
+                const carritoVacio = await response.json();
+                actualizarVistaCarrito(carritoVacio);
+                cargarProductos(); // Restaurar stock visual si es necesario
+            } catch (error) {
+                console.error("Error vaciando carrito:", error);
+            }
+        }
+
+        async function comprarCarrito() {
+            if (!carritoIdActual) {
+                alert("No hay ningún carrito seleccionado.");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/carritos/${carritoIdActual}/comprar`, {
+                    method: 'POST'
+                });
+
+                if (!response.ok) {
+                    const errorMsg = await response.text();
+                    alert("No se pudo completar la compra: " + errorMsg);
+                    return;
+                }
+
+                const carritoComprado = await response.json();
+                alert("¡Compra realizada con éxito! Gracias por tu pedido.");
+
+                actualizarVistaCarrito(carritoComprado);
+                cargarProductos(); // Refrescar el catálogo por si cambió algo
+            } catch (error) {
+                console.error("Error al procesar la compra:", error);
+            }
+        }
+
+        // Inicializar carga de datos al abrir
+        cargarProductos();
+    </script>
+</body>
+
+</html>
