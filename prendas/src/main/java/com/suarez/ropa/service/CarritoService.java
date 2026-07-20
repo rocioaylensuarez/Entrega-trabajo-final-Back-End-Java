@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@Transactional
 public class CarritoService {
 
     private final CarritoRepository carritoRepository;
@@ -43,6 +42,7 @@ public class CarritoService {
         return carritoRepository.findAll();
     }
 
+    @Transactional
     public Carrito agregarProducto(Integer carritoId, Integer productoId) {
         Carrito carrito = obtenerPorId(carritoId);
         Producto producto = productoService.obtenerPorId(productoId);
